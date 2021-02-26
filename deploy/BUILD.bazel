@@ -1,0 +1,47 @@
+load("@io_bazel_rules_k8s//k8s:objects.bzl", "k8s_objects")
+load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
+load("@io_bazel_rules_k8s//k8s:object.bzl", "k8s_object")
+
+k8s_deploy(
+    name = "crd-greeter",
+    kind = "CustomResourceDefinition",
+    template = "//deploy/crd:sample.fengye87.me_greeters.yaml",
+)
+
+k8s_objects(
+    name = "deploy",
+    objects = [
+        ":crd-greeter",
+        ":greeter-operator",
+    ],
+)
+
+k8s_deploy(
+    name = "greeter-operator",
+    images = {
+        "greeter_operator:dev": "//build:greeter_operator.image",
+        "greeter_server:dev": "//build:greeter_server.image",
+        "greeter_client:dev": "//build:greeter_client.image",
+    },
+    kind = "Deployment",
+    template = ":greeter-operator.yaml",
+)
+
+k8s_objects(
+    name = "manifests",
+    objects = [
+        ":crd-greeter",
+        ":greeter-operator.manifests",
+    ],
+)
+
+k8s_deploy(
+    name = "greeter-operator.manifests",
+    kind = "Deployment",
+    substitutions = {
+        "greeter_server:dev": "{STABLE_DOCKER_REGISTRY}/greeter_server:{STABLE_DOCKER_TAG}",
+        "greeter_client:dev": "{STABLE_DOCKER_REGISTRY}/greeter_client:{STABLE_DOCKER_TAG}",
+        "greeter_operator:dev": "{STABLE_DOCKER_REGISTRY}/greeter_operator:{STABLE_DOCKER_TAG}",
+    },
+    template = ":greeter-operator.yaml",
+)

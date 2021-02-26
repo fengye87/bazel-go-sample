@@ -1,0 +1,5 @@
+cat <<EOF
+STABLE_DOCKER_REGISTRY ${DOCKER_REGISTRY:-docker.io/fengye87}
+STABLE_DOCKER_TAG ${DOCKER_TAG:-$(git describe --tags --dirty)}
+STABLE_KUBERNETES_CLUSTER ${KUBERNETES_CLUSTER:-kubernetes}
+EOF

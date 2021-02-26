@@ -1,0 +1,5 @@
+apiVersion: sample.fengye87.me/v1alpha1
+kind: Greeter
+metadata:
+  name: example
+spec: {}

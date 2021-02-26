@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greeter-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: greeter-operator
+  namespace: greeter-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: greeter-operator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - sample.fengye87.me
+    resources:
+      - greeters
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - sample.fengye87.me
+    resources:
+      - greeters/status
+    verbs:
+      - get
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: greeter-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: greeter-operator
+subjects:
+  - kind: ServiceAccount
+    name: greeter-operator
+    namespace: greeter-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: greeter-operator-leader-election
+  namespace: greeter-system
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases/status
+    verbs:
+      - get
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: greeter-operator-leader-election
+  namespace: greeter-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: greeter-operator-leader-election
+subjects:
+  - kind: ServiceAccount
+    name: greeter-operator
+    namespace: greeter-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter-operator
+  namespace: greeter-system
+spec:
+  selector:
+    matchLabels:
+      app: greeter-operator
+  template:
+    metadata:
+      labels:
+        app: greeter-operator
+    spec:
+      serviceAccountName: greeter-operator
+      containers:
+        - name: greeter-operator
+          image: greeter_operator:dev
+          env:
+            - name: GREETER_SERVER_IMAGE
+              value: greeter_server:dev
+            - name: GREETER_CLIENT_IMAGE
+              value: greeter_client:dev

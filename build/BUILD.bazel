@@ -1,0 +1,36 @@
+load("@io_bazel_rules_docker//contrib:push-all.bzl", "docker_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_bundle", "container_image")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+docker_push(
+    name = "images.push",
+    bundle = ":images",
+)
+
+container_bundle(
+    name = "images",
+    images = {
+        "{STABLE_DOCKER_REGISTRY}/greeter_server:{STABLE_DOCKER_TAG}": ":greeter_server.image",
+        "{STABLE_DOCKER_REGISTRY}/greeter_client:{STABLE_DOCKER_TAG}": ":greeter_client.image",
+        "{STABLE_DOCKER_REGISTRY}/greeter_operator:{STABLE_DOCKER_TAG}": ":greeter_operator.image",
+    },
+)
+
+go_image(
+    name = "greeter_server.image",
+    binary = "//cmd/greeter_server",
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "greeter_client.image",
+    base = "@centos_7//image",
+    files = ["//cmd/greeter_client"],
+    visibility = ["//visibility:public"],
+)
+
+go_image(
+    name = "greeter_operator.image",
+    binary = "//operator",
+    visibility = ["//visibility:public"],
+)
