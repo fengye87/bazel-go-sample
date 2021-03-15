@@ -19,8 +19,8 @@ jobs:
       - name: Build and push Docker images
         run: make push
 
-      - name: Generate manifests
-        run: make manifests
+      - name: Generate manifest
+        run: make manifest
 
       - id: create_release
         uses: actions/create-release@v1

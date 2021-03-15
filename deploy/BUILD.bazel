@@ -1,6 +1,5 @@
 load("@io_bazel_rules_k8s//k8s:objects.bzl", "k8s_objects")
 load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
-load("@io_bazel_rules_k8s//k8s:object.bzl", "k8s_object")
 
 k8s_deploy(
     name = "crd-greeter",
@@ -28,20 +27,27 @@ k8s_deploy(
 )
 
 k8s_objects(
-    name = "manifests",
+    name = "manifest",
     objects = [
         ":crd-greeter",
-        ":greeter-operator.manifests",
+        ":greeter-operator.manifest",
     ],
 )
 
 k8s_deploy(
-    name = "greeter-operator.manifests",
+    name = "greeter-operator.manifest",
     kind = "Deployment",
-    substitutions = {
-        "greeter_server:dev": "{STABLE_DOCKER_REGISTRY}/greeter_server:{STABLE_DOCKER_TAG}",
-        "greeter_client:dev": "{STABLE_DOCKER_REGISTRY}/greeter_client:{STABLE_DOCKER_TAG}",
-        "greeter_operator:dev": "{STABLE_DOCKER_REGISTRY}/greeter_operator:{STABLE_DOCKER_TAG}",
-    },
+    substitutions = select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": {
+            "greeter_server:dev": "{STABLE_DOCKER_REGISTRY}/greeter_server:{STABLE_DOCKER_TAG}",
+            "greeter_client:dev": "{STABLE_DOCKER_REGISTRY}/greeter_client:{STABLE_DOCKER_TAG}",
+            "greeter_operator:dev": "{STABLE_DOCKER_REGISTRY}/greeter_operator:{STABLE_DOCKER_TAG}",
+        },
+        "@io_bazel_rules_go//go/platform:linux_arm64": {
+            "greeter_server:dev": "{STABLE_DOCKER_REGISTRY}/greeter_server.arm64:{STABLE_DOCKER_TAG}",
+            "greeter_client:dev": "{STABLE_DOCKER_REGISTRY}/greeter_client.arm64:{STABLE_DOCKER_TAG}",
+            "greeter_operator:dev": "{STABLE_DOCKER_REGISTRY}/greeter_operator.arm64:{STABLE_DOCKER_TAG}",
+        },
+    }),
     template = ":greeter-operator.yaml",
 )

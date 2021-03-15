@@ -4,7 +4,10 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 
 docker_push(
     name = "images.push",
-    bundle = ":images",
+    bundle = select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": ":images",
+        "@io_bazel_rules_go//go/platform:linux_arm64": ":images.arm64",
+    }),
 )
 
 container_bundle(
@@ -16,21 +19,41 @@ container_bundle(
     },
 )
 
+container_bundle(
+    name = "images.arm64",
+    images = {
+        "{STABLE_DOCKER_REGISTRY}/greeter_server.arm64:{STABLE_DOCKER_TAG}": ":greeter_server.image",
+        "{STABLE_DOCKER_REGISTRY}/greeter_client.arm64:{STABLE_DOCKER_TAG}": ":greeter_client.image",
+        "{STABLE_DOCKER_REGISTRY}/greeter_operator.arm64:{STABLE_DOCKER_TAG}": ":greeter_operator.image",
+    },
+)
+
 go_image(
     name = "greeter_server.image",
+    base = select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": "@centos_7//image",
+        "@io_bazel_rules_go//go/platform:linux_arm64": "@centos_7.arm64//image",
+    }),
     binary = "//cmd/greeter_server",
     visibility = ["//visibility:public"],
 )
 
 container_image(
     name = "greeter_client.image",
-    base = "@centos_7//image",
+    base = select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": "@centos_7//image",
+        "@io_bazel_rules_go//go/platform:linux_arm64": "@centos_7.arm64//image",
+    }),
     files = ["//cmd/greeter_client"],
     visibility = ["//visibility:public"],
 )
 
 go_image(
     name = "greeter_operator.image",
+    base = select({
+        "@io_bazel_rules_go//go/platform:linux_amd64": "@centos_7//image",
+        "@io_bazel_rules_go//go/platform:linux_arm64": "@centos_7.arm64//image",
+    }),
     binary = "//operator",
     visibility = ["//visibility:public"],
 )
