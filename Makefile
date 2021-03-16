@@ -15,5 +15,8 @@ dev:
 push:
 	bazel run //build:images.push
 
-manifests:
-	bazel run //deploy:manifests | tee greeter-operator.yaml
+manifest:
+	bazel run //deploy:manifest | tee greeter-operator.yaml
+
+clean:
+	bazel clean --expunge
