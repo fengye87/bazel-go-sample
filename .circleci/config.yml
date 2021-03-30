@@ -14,5 +14,10 @@ jobs:
             chmod +x bazelisk-linux-amd64
             sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
       - run:
+          name: Install deps
+          command: |
+            sudo apt-get update
+            sudo apt-get install patch
+      - run:
           name: Run tests
           command: make 
