@@ -17,7 +17,7 @@ jobs:
           name: Install deps
           command: |
             sudo apt-get update
-            sudo apt-get install patch
+            sudo apt-get install patch python3
       - run:
           name: Run tests
           command: make 
