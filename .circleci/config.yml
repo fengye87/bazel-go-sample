@@ -8,5 +8,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install bazel
+          command: |
+            curl -LO https://github.com/bazelbuild/bazelisk/releases/download/v1.7.5/bazelisk-linux-amd64
+            chmod +x bazelisk-linux-amd64
+            sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
+      - run:
           name: Run tests
           command: make 
