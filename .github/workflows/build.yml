@@ -23,3 +23,23 @@ jobs:
 
       - name: Test
         run: make test
+
+  build_arm64:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.x
+
+      - name: Install Kubebuilder
+        run: |
+          os=$(go env GOOS)
+          arch=$(go env GOARCH)
+          curl -L https://go.kubebuilder.io/dl/2.3.1/${os}/${arch} | tar -xz -C /tmp/
+          sudo rm -rf /usr/local/kubebuilder
+          sudo mv /tmp/kubebuilder_2.3.1_${os}_${arch} /usr/local/kubebuilder
+
+      - name: Test
+        run: make test
