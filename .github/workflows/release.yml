@@ -11,16 +11,43 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: docker/setup-qemu-action@v1
+
+      - uses: docker/setup-buildx-action@v1
+
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker images
-        run: make push
+      - id: get_version
+        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
 
-      - name: Generate manifest
-        run: make manifest
+      - uses: docker/build-push-action@v2
+        with:
+          file: build/Dockerfile
+          target: greeter_server
+          platforms: linux/amd64,linux/arm64
+          tags: fengye87/greeter_server:${{ steps.get_version.outputs.version }}
+          push: true
+
+      - uses: docker/build-push-action@v2
+        with:
+          file: build/Dockerfile
+          target: greeter_client
+          platforms: linux/amd64,linux/arm64
+          tags: fengye87/greeter_client:${{ steps.get_version.outputs.version }}
+          push: true
+
+      - uses: docker/build-push-action@v2
+        with:
+          file: build/Dockerfile
+          target: greeter_operator
+          platforms: linux/amd64,linux/arm64
+          tags: fengye87/greeter_operator:${{ steps.get_version.outputs.version }}
+          push: true
+
+      - run: make manifest
 
       - id: create_release
         uses: actions/create-release@v1

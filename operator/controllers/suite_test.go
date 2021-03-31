@@ -3,6 +3,7 @@ package controllers
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -38,7 +39,8 @@ var _ = BeforeSuite(func(done Done) {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "deploy", "crd")},
+		CRDDirectoryPaths:        []string{filepath.Join("..", "..", "deploy", "crd")},
+		ControlPlaneStartTimeout: time.Minute,
 	}
 
 	var err error

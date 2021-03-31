@@ -12,9 +12,6 @@ test:
 dev:
 	bazel run //deploy:deploy.apply
 
-push:
-	bazel run //build:images.push
-
 manifest:
 	bazel run //deploy:manifest | tee greeter-operator.yaml
 
